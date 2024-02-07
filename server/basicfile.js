@@ -14,11 +14,33 @@ const server = http.createServer((req,res)=>{
 
     }
     if(url === '/message' && method ==='POST'){
-        fs.writeFileSync('message.txt','DUMMY');
+        // getting the data of the form on submit which runs in the form of data stream and we
+        // can capture it in the form of chunks and perform operation on that
+        const body = [];
+        req.on('data',(chunk)=>{
+            console.log(chunk);
+                body.push(chunk);
+        });
+        // now we got the pieces of msg and we will buffer and make single string
+        req.on('end',()=>{
+            const parsedBody = Buffer.concat(body).toString();
+            console.log(parsedBody);
+            // now write this message in file
+
+            const formdata = parsedBody.split('=')[1];
+            fs.writeFileSync('formdata.txt',formdata);
+
+        })
+       // fs.writeFileSync('message.txt','DUMMY');
         res.statusCode = 302;
         res.setHeader('Location','/');
         return res.end();
     }
+    res.setHeader('Content-Type','text/html');
+    res.write('<html>');
+    res.write('<p>Welcome to the node js</p>');
+    res.write('</html>');
+    res.end();
 })
 
 server.listen(3000);
